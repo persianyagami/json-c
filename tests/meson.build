@@ -1,5 +1,16 @@
-test_includes = include_directories('.')
-test_deps = [jsonc_dep]
+#This hack is needed for Windows tests
+test_lib = static_library(
+  'jsonctest',
+  objects: libjson.extract_all_objects(
+    recursive: false,
+  ),
+  install: false,
+)
+
+test_deps = declare_dependency(
+  include_directories: '..',
+  link_with: test_lib,
+)
 
 # List of test sources and expected output files
 test_cases = [
@@ -27,6 +38,7 @@ test_cases = [
   ['test_visit', 'test_visit.expected'],
   ['test_object_iterator', 'test_object_iterator.expected'],
   ['test_json_pointer', 'test_json_pointer.expected'],
+  ['test_safe_json_pointer_set', 'test_safe_json_pointer_set.expected'],
   ['test_json_patch', 'test_json_patch.expected'],
 ]
 
@@ -53,7 +65,6 @@ foreach t : test_cases
   name = t[0]
   expected = t[1]
   exe = executable(name, name + '.c',
-    include_directories: test_includes,
     dependencies: test_deps
   )
 
